@@ -70,6 +70,15 @@ class Router
      */
     public function buildRoute($name, $params = []): string{
         // @TODO: Implement this
+        if(!array_key_exists($name,$this->map)){
+            throw new \Exception('Route not found');
+        }
+        $route = $_SERVER['SERVER_NAME'].$this->map[$name]['path'];
+
+        foreach($params as $key=>$value){
+            $route = str_replace('{'.$key.'}', $value, $route);
+        }
+        return $route;
     }
 
     /**

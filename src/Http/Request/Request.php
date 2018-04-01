@@ -9,6 +9,16 @@ namespace Mindk\Framework\Http\Request;
  */
 class Request
 {
+    private static $_instance;
+
+    public static function getInstance() {
+        if (self::$_instance === null) {
+            self::$_instance = new self;
+        }
+
+        return self::$_instance;
+    }
+
     /**
      * @var array   Http headers
      */
@@ -137,7 +147,29 @@ class Request
     public function filterVar($data, string $type = 'raw') {
 
         //@TODO: Add some filtration for data here!
-
+        switch ($type){
+            case 'int':
+                $data =  (int)$data;
+                break;
+            case 'bool':
+                $data = (bool)$data;
+                break;        
+            case 'float':
+                $data = (float)$data;
+                break;
+            case 'string':
+                $data = (string)$data;
+                break;
+            case 'array':
+                $data = (array)$data;
+                break;
+            case 'object':
+                $data = (object)$data;
+                break;
+            default:
+            $data = (string)$data;
+        }
         return $data;
+
     }
 }
