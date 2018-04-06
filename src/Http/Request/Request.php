@@ -166,8 +166,6 @@ class Request
             case 'object':
                 $data = (object)$data;
                 break;
-            default:
-            $data = (string)$data;
         }
         return $data;
 

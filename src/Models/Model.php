@@ -37,8 +37,18 @@ abstract class Model
     /**
      * Create new record
      */
-    public function create( $data ) {
+    public function create($data) {
         //@TODO: Implement this
+
+        $columns = self::setSQLColumns($data);
+        $values = self::setSQLValues($data);
+
+        $sql = 'INSERT INTO `' . $this->tableName .  '` (' . $columns . 
+            ') VALUES (' . $values . ')';
+
+        if ( $this->dbo->setQuery($sql) ) {
+            return 'Insert to DB was successfully!';
+        };
     }
 
     /**
@@ -60,15 +70,24 @@ abstract class Model
      *
      * @return bool
      */
-    public function save() {
+    public function save($id, $data) {
         //@TODO: Implement this
+        $columns = self::setSQLColumns($data);
+        $values = self::setSQLValues($data);
+        var_dump($columns, $values);
+        // TO DO
     }
 
     /**
      * Delete record from DB
      */
-    public function delete() {
+    public function delete($id) {
         //@TODO: Implement this
+        $sql = 'DELETE FROM `' . $this->tableName . '` WHERE id=' . $id;
+        if ( $this->dbo->setQuery($sql) ) {
+            return 'Intem successfully deleted from DB';
+        };
+
     }
 
     /**
@@ -80,5 +99,28 @@ abstract class Model
         $sql = 'SELECT * FROM `' . $this->tableName . '`';
 
         return $this->dbo->setQuery($sql)->getList(get_class($this));
+    }
+
+    /**
+     * Get string of key's array columns
+     *
+     * @return string
+     */
+    protected function setSQLColumns($data): string {
+        return implode(", ", array_keys($data));
+    }
+    
+    /**
+     * Get string of value's array columns
+     *
+     * @return string
+     */
+    protected function setSQLValues($data): string {
+        // to building sql we need quotes around the values
+        $values = [];
+        foreach (array_values($data) as $value) {
+            array_push($values, "'" . $value . "'");
+        }
+        return implode(", ", array_values($values));
     }
 }
