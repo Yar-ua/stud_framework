@@ -72,10 +72,13 @@ abstract class Model
      */
     public function save($id, $data) {
         //@TODO: Implement this
-        $columns = self::setSQLColumns($data);
         $values = self::setSQLValues($data);
-        var_dump($columns, $values);
-        // TO DO
+        $sql = 'UPDATE `' . $this->tableName .  '` SET ' . self::pdoSet($data) . 
+            ' WHERE id=' . $id;
+
+        if ( $this->dbo->setQuery($sql) ) {
+            return 'Update to DB was successfully!';
+        };
     }
 
     /**
@@ -85,7 +88,9 @@ abstract class Model
         //@TODO: Implement this
         $sql = 'DELETE FROM `' . $this->tableName . '` WHERE id=' . $id;
         if ( $this->dbo->setQuery($sql) ) {
-            return 'Intem successfully deleted from DB';
+            return 'Item successfully deleted from DB';
+        } else {
+            return 'Data with specified id not found';
         };
 
     }
@@ -100,6 +105,7 @@ abstract class Model
 
         return $this->dbo->setQuery($sql)->getList(get_class($this));
     }
+
 
     /**
      * Get string of key's array columns
@@ -123,4 +129,18 @@ abstract class Model
         }
         return implode(", ", array_values($values));
     }
+
+    /**
+     * Get prepeared line to using in SQL request for UPDATE
+     *
+     * @return string
+     */
+    protected function pdoSet($data) {
+        $set = "";
+        foreach ($data as $column => $value) {
+            $set .= $column . "='" . $value . "', ";
+        }
+        return substr($set, 0, -2);
+    }
+
 }
