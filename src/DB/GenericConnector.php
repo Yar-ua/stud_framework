@@ -73,4 +73,15 @@ class GenericConnector implements DBOConnectorInterface
 
         return $result;
     }
+
+    /**
+     * Get list of resulting rows
+     *
+     * @param 
+     * @return 
+     */
+    public function insertQuery($sql, $values) {
+        $result = $this->connection->prepare($sql);
+        return $result->execute($values);
+    }
 }

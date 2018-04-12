@@ -31,4 +31,12 @@ interface DBOConnectorInterface
      * @return mixed
      */
     public function getList($targetClass = '\stdClass');
+
+    /**
+     * Get list of resulting rows
+     *
+     * @param string builded SQL, array values
+     * @return bool true/false
+     */
+    public function insertQuery($sql, $values);
 }
