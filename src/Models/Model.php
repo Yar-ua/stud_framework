@@ -37,8 +37,14 @@ abstract class Model
     /**
      * Create new record
      */
-    public function create( $data ) {
+    public function create($data) {
         //@TODO: Implement this
+
+        $sql = 'INSERT INTO `' . $this->tableName .  '` SET ' . self::pdoSet($data);
+        
+        if ($this->dbo->insertQuery($sql, $data)) {
+            return true;
+        }
     }
 
     /**
@@ -60,15 +66,30 @@ abstract class Model
      *
      * @return bool
      */
-    public function save() {
+    public function save($id, $data) {
         //@TODO: Implement this
+        //$values = self::setSQLValues($data);
+        $sql = 'UPDATE `' . $this->tableName .  '` SET ' . self::pdoSet($data) .
+            ' WHERE id=' . (int)$id;
+
+        if ($this->dbo->insertQuery($sql, $data)) {
+            return true;
+        }
     }
 
     /**
      * Delete record from DB
      */
-    public function delete() {
+    public function delete($id) {
         //@TODO: Implement this
+        // check for exsistense model in DB with specified id
+        if ( empty(self::load($id)) ) {
+            throw new \Exception('No data with current id in DB to delete');
+        }
+
+        $sql = 'DELETE FROM `' . $this->tableName . '` WHERE id=' . (int)$id;
+        $this->dbo->setQuery($sql);
+        return true;
     }
 
     /**
@@ -81,4 +102,18 @@ abstract class Model
 
         return $this->dbo->setQuery($sql)->getList(get_class($this));
     }
+
+    /**
+     * Get prepeared line to using in SQL request for UPDATE
+     *
+     * @return string builded sql
+     */
+    protected function pdoSet($data) {
+        $set = "";
+        foreach ($data as $column => $value) {
+            $set .= $column . "=:" . $column . ", ";
+        }
+        return substr($set, 0, -2);
+    }
+
 }
