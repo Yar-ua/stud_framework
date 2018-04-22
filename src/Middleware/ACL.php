@@ -2,6 +2,8 @@
 
 namespace Mindk\Framework\Middleware;
 
+use Mindk\Framework\Auth\AuthService;
+use Mindk\Framework\Http\Response\JsonResponse;
 use Optimus\Onion\LayerInterface;
 
 /**
@@ -18,6 +20,13 @@ class ACL implements LayerInterface
      */
     public function peel($object, \Closure $next){
         // Assuming $object is route object:
+        $acl = $object->acl;
+
+        if(!empty($acl)) {
+            if(!AuthService::checkRoles($object->acl)){
+                return new JsonResponse('Access denied', 403);
+            }
+        }
 
         return $next($object);
     }
