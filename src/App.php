@@ -2,11 +2,11 @@
 
 namespace Mindk\Framework;
 
+require(dirname(__DIR__).'/vendor/autoload.php');
+
 use Mindk\Framework\Exceptions\NotFoundException;
+use Mindk\Framework\Middleware\RouteMiddlewareGateway;
 use Mindk\Framework\Routing\Route;
-use Mindk\Framework\Routing\Router;
-use Mindk\Framework\Http\Request\Request;
-use Mindk\Framework\Http\Response\Response;
 use Mindk\Framework\Http\Response\JsonResponse;
 use Mindk\Framework\Config\Config;
 use Mindk\Framework\DI\Injector;
@@ -39,26 +39,12 @@ class App
         try{
             $router = Injector::make('router', ['mapping' => $this->config->get('routes', []) ] );
             $route = $router->findRoute();
+            $middlewareGateway = new RouteMiddlewareGateway($this->config->get('middleware'));
 
             if($route instanceof Route){
-
-                $controllerReflection = new \ReflectionClass($route->controller);
-
-                if($controllerReflection->hasMethod($route->action)){
-                    $controller = Injector::make($route->controller);
-                    $methodReflection = $controllerReflection->getMethod($route->action);
-
-                    // Get response from responsible controller:
-                    $paramset = Injector::resolveParams($methodReflection->getParameters(), $route->params);
-                    $response = $methodReflection->invokeArgs($controller, $paramset);
-
-                    // Ensure it's Response subclass or wrap with JsonResponse:
-                    if(!($response instanceof Response)){
-                        $response = new JsonResponse($response);
-                    }
-                } else {
-                    throw new \Exception('Bad controller action');
-                }
+                $response = $middlewareGateway->handle($route, function($object) {
+                    return $this->processRoute($object);
+                });
             } else {
                 throw new NotFoundException('Route not found');
             }
@@ -72,5 +58,33 @@ class App
 
         // Send final response:
         $response->send();
+    }
+
+    /**
+     * Process route
+     *
+     * @param Route $route
+     *
+     * @return Response
+     * @throws \Exception
+     * @throws \ReflectionException
+     */
+    protected function processRoute(Route $route){
+
+        $controllerReflection = new \ReflectionClass($route->controller);
+
+        if($controllerReflection->hasMethod($route->action)){
+            $controller = Injector::make($route->controller);
+            $methodReflection = $controllerReflection->getMethod($route->action);
+
+            // Get response from responsible controller:
+            $paramset = Injector::resolveParams($methodReflection->getParameters(), $route->params);
+            $response = $methodReflection->invokeArgs($controller, $paramset);
+
+        } else {
+            throw new \Exception('Bad controller action');
+        }
+
+        return $response;
     }
 }
