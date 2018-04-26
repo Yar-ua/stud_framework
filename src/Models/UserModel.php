@@ -46,4 +46,43 @@ class UserModel extends Model
 
         return $this->dbo->setQuery($sql)->getResult($this);
     }
+
+    /**
+     * Check, if user with current login exists in DB
+     * 
+     * @param $user->login
+     *
+     * @return mixed
+     */
+    public function isUniqueLogin($login){
+        $sql = sprintf("SELECT * FROM `users` WHERE `email`='%s'", $login);
+        $result = $this->dbo->setQuery($sql)->getResult($this);
+        return $result;
+    }
+
+
+    /**
+     * Create User in DB
+     *
+     * @param array with $user's login, password, token, role
+     *
+     * @return bool from parent function create (parent is Model)
+     */
+    public function create($data) {
+        // Using method create(), what was implemented in base model (Model)
+        // Try to follow DRY
+        return parent::create($data);
+    }
+
+    /**
+     * Update User or User's token in DB
+     *
+     * @param array with $user->token
+     *
+     * @return bool from parent function save (parent is Model)
+     */
+    public function save($id, $data) {
+        // Using method save(), what was implemented in base model (Model)
+        return parent::save($id, $data);
+    }
 }
