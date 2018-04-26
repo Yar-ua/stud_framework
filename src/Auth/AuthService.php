@@ -38,6 +38,7 @@ class AuthService
      */
     public static function checkRoles($roles) {
         $roles = (array)$roles;
+        $user = AuthService::getUser();
         $userRole = empty($user) ? 'guest' : self::$user->role;
 
         return in_array($userRole, $roles);
