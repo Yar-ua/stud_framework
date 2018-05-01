@@ -6,6 +6,7 @@ use Mindk\Framework\Exceptions\AuthRequiredException;
 use Mindk\Framework\Http\Request\Request;
 use Mindk\Framework\Models\UserModel;
 use Mindk\Framework\DB\DBOConnectorInterface;
+use Mindk\Framework\Auth\AuthService;
 
 /**
  * Class UserController
@@ -24,7 +25,7 @@ class UserController
      */
     public function register(Request $request, UserModel $model, DBOConnectorInterface $dbo) {
         //@TODO: Implement
-        $user = new UserModel($dbo);
+        $user = $model;
         $user->login = $request->get('login', '', 'string');
         $user->password = $request->get('password', '', 'string');
         
@@ -37,10 +38,8 @@ class UserController
             throw new AuthRequiredException('User with current login alredy exists, try another login');
         }
         // Set default registred user role
-        if (empty($request->get('role', '', 'string'))) {
-            $user->role = 'user';
-        }
-
+        $user->role = 'user';
+        
         $user->token = md5(uniqid());
         $data = array('email' => $user->login, 'password' => md5($user->password), 'token' => $user->token, 'role' => $user->role);
 
@@ -91,7 +90,7 @@ class UserController
      */
     public function logout(Request $request, UserModel $model, DBOConnectorInterface $dbo) {
         //@TODO: Implement
-        $user = $model->findByToken($request->getHeader('X-Auth'));
+        $user = AuthService::getUser();
         if ( $user->save($user->id, array('token' => 'null')) ) {
             unset($user);
             return true;
