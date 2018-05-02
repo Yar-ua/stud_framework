@@ -46,4 +46,17 @@ class UserModel extends Model
 
         return $this->dbo->setQuery($sql)->getResult($this);
     }
+
+    /**
+     * Check, if user with current login exists in DB
+     * 
+     * @param $user->login
+     *
+     * @return mixed
+     */
+    public function isUniqueLogin($login){
+        $sql = sprintf("SELECT * FROM `users` WHERE `email`='%s'", $login);
+        $result = $this->dbo->setQuery($sql)->getResult($this);
+        return $result;
+    }
 }
