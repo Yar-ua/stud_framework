@@ -8,7 +8,6 @@ use Mindk\Framework\Exceptions\NotFoundException;
 use Mindk\Framework\Middleware\RouteMiddlewareGateway;
 use Mindk\Framework\Routing\Route;
 use Mindk\Framework\Http\Response\JsonResponse;
-use Mindk\Framework\Http\Response\Response;
 use Mindk\Framework\Config\Config;
 use Mindk\Framework\DI\Injector;
 
@@ -40,9 +39,6 @@ class App
         try{
             $router = Injector::make('router', ['mapping' => $this->config->get('routes', []) ] );
             $request = Injector::make('request');
-            if($request->getMethod() === 'OPTIONS'){
-                $response = new Response('', 204);
-            } else {
 
                 $route = $router->findRoute();
                 $middlewareGateway = new RouteMiddlewareGateway($this->config->get('middleware'));
@@ -54,7 +50,6 @@ class App
                 } else {
                     throw new NotFoundException('Route not found');
                 }
-            }
         }
         catch(NotFoundException $e) {
             $response = $e->toResponse();
@@ -88,6 +83,10 @@ class App
             $paramset = Injector::resolveParams($methodReflection->getParameters(), $route->params);
             $response = $methodReflection->invokeArgs($controller, $paramset);
 
+            // Ensure it's Response subclass or wrap with JsonResponse:
+            if(!($response instanceof Response)){
+                $response = new JsonResponse($response);
+            }
         } else {
             throw new \Exception('Bad controller action');
         }
