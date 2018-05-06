@@ -79,7 +79,12 @@ class Response
             foreach ($this->headers as $key => $value) {
                 header($key . ': ' . $value);
             }
+        
         }
+
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Origin, X-Auth');
+        header('Access-Control-Allow-Methods: POST, GET, PUT, DELETE, OPTIONS');
     }
 
     /**

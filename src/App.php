@@ -8,6 +8,7 @@ use Mindk\Framework\Exceptions\NotFoundException;
 use Mindk\Framework\Middleware\RouteMiddlewareGateway;
 use Mindk\Framework\Routing\Route;
 use Mindk\Framework\Http\Response\JsonResponse;
+use Mindk\Framework\Http\Response\Response;
 use Mindk\Framework\Config\Config;
 use Mindk\Framework\DI\Injector;
 
@@ -38,15 +39,21 @@ class App
 
         try{
             $router = Injector::make('router', ['mapping' => $this->config->get('routes', []) ] );
-            $route = $router->findRoute();
-            $middlewareGateway = new RouteMiddlewareGateway($this->config->get('middleware'));
-
-            if($route instanceof Route){
-                $response = $middlewareGateway->handle($route, function($object) {
-                    return $this->processRoute($object);
-                });
+            $request = Injector::make('request');
+            if($request->getMethod() === 'OPTIONS'){
+                $response = new Response('', 204);
             } else {
-                throw new NotFoundException('Route not found');
+
+                $route = $router->findRoute();
+                $middlewareGateway = new RouteMiddlewareGateway($this->config->get('middleware'));
+
+                if($route instanceof Route){
+                    $response = $middlewareGateway->handle($route, function($object) {
+                        return $this->processRoute($object);
+                    });
+                } else {
+                    throw new NotFoundException('Route not found');
+                }
             }
         }
         catch(NotFoundException $e) {
