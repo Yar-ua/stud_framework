@@ -27,21 +27,23 @@ class UserController
         //@TODO: Implement
         $user = $model;
         $user->login = $request->get('login', '', 'string');
+        $user->email = $request->get('email', '', 'string');
         $user->password = $request->get('password', '', 'string');
         
         // Light validation, what login and password exists
-        if(empty($user->login) or empty($user->password)) {
-            throw new AuthRequiredException('No login or password for registration');
+        if(empty($user->login) or empty($user->email) or empty($user->password)) {
+            throw new AuthRequiredException('No login, email or password for registration');
         }
+
         // Check for login dublicate in DB
-        if ($user->isUniqueLogin($user->login)) {
-            throw new AuthRequiredException('User with current login alredy exists, try another login');
+        if ($user->isUniqueValue('login', $user->login) or $user->isUniqueValue('email', $user->email)) {
+            throw new AuthRequiredException('User with current login or email alredy exists, try another login');
         }
+
         // Set default registred user role
-        $user->role = 'user';
-        
+        $user->role = 'user';        
         $user->token = md5(uniqid());
-        $data = array('email' => $user->login, 'password' => md5($user->password), 'token' => $user->token, 'role' => $user->role);
+        $data = array('login' => $user->login, 'email' => $user->email, 'password' => md5($user->password), 'token' => $user->token, 'role' => $user->role);
 
         if ($user->create($data)) {
             return $user->token;
