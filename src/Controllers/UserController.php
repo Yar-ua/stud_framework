@@ -46,7 +46,7 @@ class UserController
         $data = array('login' => $user->login, 'email' => $user->email, 'password' => md5($user->password), 'token' => $user->token, 'role' => $user->role);
 
         if ($user->create($data)) {
-            return $user->token;
+            return json_encode(['login' => $user->login, 'token' => $user->token]);
         } else {
             throw new AuthRequiredException('Registration unsuccessfully, write to DB aborted');
         }
@@ -78,7 +78,7 @@ class UserController
         $data = array('token' => $user->token);
         $user->save($user->id, $data);
 
-        return $user->token;
+        return json_encode(['login' => $user->login, 'token' => $user->token]);
     }
 
     /**
