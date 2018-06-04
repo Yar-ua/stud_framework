@@ -28,7 +28,7 @@ class UserModel extends Model
      * @return mixed
      */
     public function findByCredentials($login, $password){
-        $sql = sprintf("SELECT * FROM `%s` WHERE `email`='%s' AND `password`='%s'", $this->tableName, $login, md5($password));
+        $sql = sprintf("SELECT * FROM `%s` WHERE `login`='%s' AND `password`='%s'", $this->tableName, $login, md5($password));
 
         return $this->dbo->setQuery($sql)->getResult($this);
     }
@@ -54,8 +54,8 @@ class UserModel extends Model
      *
      * @return mixed
      */
-    public function isUniqueLogin($login){
-        $sql = sprintf("SELECT * FROM `users` WHERE `email`='%s'", $login);
+    public function isUniqueValue($column, $value){
+        $sql = sprintf("SELECT * FROM `users` WHERE `" . $column . "`='%s'", $value);
         $result = $this->dbo->setQuery($sql)->getResult($this);
         return $result;
     }
