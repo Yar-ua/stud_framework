@@ -41,9 +41,12 @@ abstract class Model
         //@TODO: Implement this
 
         $sql = 'INSERT INTO `' . $this->tableName .  '` SET ' . self::pdoSet($data);
-        
-        if ($this->dbo->insertQuery($sql, $data)) {
-            return true;
+        $result = $this->dbo->insertQuery($sql, $data);
+
+        if ($result['status'] == true) {
+            return self::load($result['id']);
+        } else {
+            throw new \Exception('Create operation was unsuccessfully');
         }
     }
 
@@ -72,8 +75,12 @@ abstract class Model
         $sql = 'UPDATE `' . $this->tableName .  '` SET ' . self::pdoSet($data) .
             ' WHERE id=' . (int)$id;
 
-        if ($this->dbo->insertQuery($sql, $data)) {
-            return true;
+        $result = $this->dbo->insertQuery($sql, $data);
+
+        if ($result['status'] == true) {
+            return self::load((int)$id);
+        } else {
+            throw new \Exception('Update operation was unsuccessfully');
         }
     }
 
@@ -89,7 +96,7 @@ abstract class Model
 
         $sql = 'DELETE FROM `' . $this->tableName . '` WHERE id=' . (int)$id;
         $this->dbo->setQuery($sql);
-        return true;
+        return ['id' => $id];
     }
 
     /**
