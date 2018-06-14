@@ -28,11 +28,13 @@ class UserController
         $user = $model;
         $user->login = $request->get('login', '', 'string');
         $user->email = $request->get('email', '', 'string');
+        $user->phone = $request->get('phone', '', 'string');
         $user->password = $request->get('password', '', 'string');
         
         // Light validation, what login and password exists
-        if(empty($user->login) or empty($user->email) or empty($user->password)) {
-            throw new AuthRequiredException('No login, email or password for registration');
+        if(empty($user->login) or empty($user->email) or 
+                empty($user->password) or empty($user->password)) {
+            throw new AuthRequiredException('No login, email, phone or password for registration');
         }
 
         // Check for login dublicate in DB
@@ -43,10 +45,11 @@ class UserController
         // Set default registred user role
         $user->role = 'user';        
         $user->token = md5(uniqid());
-        $data = array('login' => $user->login, 'email' => $user->email, 'password' => md5($user->password), 'token' => $user->token, 'role' => $user->role);
+        $data = array('login' => $user->login, 'email' => $user->email, 'phone' => $user->phone,
+            'password' => md5($user->password), 'token' => $user->token, 'role' => $user->role);
 
         if ($user->create($data)) {
-            return json_encode(['login' => $user->login, 'token' => $user->token]);
+            return $user;
         } else {
             throw new AuthRequiredException('Registration unsuccessfully, write to DB aborted');
         }
@@ -78,7 +81,7 @@ class UserController
         $data = array('token' => $user->token);
         $user->save($user->id, $data);
 
-        return json_encode(['login' => $user->login, 'token' => $user->token]);
+        return $user;
     }
 
     /**

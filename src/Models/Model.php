@@ -36,10 +36,13 @@ abstract class Model
 
     /**
      * Create new record
+     *
+     * @param array $data
+     * 
+     * @return object
      */
     public function create($data) {
         //@TODO: Implement this
-
         $sql = 'INSERT INTO `' . $this->tableName .  '` SET ' . self::pdoSet($data);
         $result = $this->dbo->insertQuery($sql, $data);
 
@@ -61,17 +64,22 @@ abstract class Model
         $sql = 'SELECT * FROM `' . $this->tableName .
             '` WHERE `'.$this->primaryKey.'`='.(int)$id; //!
 
-        return $this->dbo->setQuery($sql)->getResult($this);
+        $result = $this->dbo->setQuery($sql)->getResult($this);
+        if ($result) {
+            return $result;
+        } else {
+            throw new \Exception('Cant find data with current id');
+        }
     }
 
     /**
      * Save record state to db
      *
-     * @return bool
+     * @param object id, array $data
+     *
+     * @return object
      */
     public function save($id, $data) {
-        //@TODO: Implement this
-        //$values = self::setSQLValues($data);
         $sql = 'UPDATE `' . $this->tableName .  '` SET ' . self::pdoSet($data) .
             ' WHERE id=' . (int)$id;
 
@@ -86,9 +94,12 @@ abstract class Model
 
     /**
      * Delete record from DB
+     *
+     * @param object id
+     *
+     * @return id of deleting object
      */
     public function delete($id) {
-        //@TODO: Implement this
         // check for exsistense model in DB with specified id
         if ( empty(self::load($id)) ) {
             throw new \Exception('No data with current id in DB to delete');
@@ -102,7 +113,7 @@ abstract class Model
     /**
      * Get list of records
      *
-     * @return array
+     * @return array for using in the BD query
      */
     public function getList() {
         $sql = 'SELECT * FROM `' . $this->tableName . '`';
@@ -111,7 +122,7 @@ abstract class Model
     }
 
     /**
-     * Get prepeared line to using in SQL request for UPDATE
+     * Get prepeared line to using in SQL request for update or create object
      *
      * @return string builded sql
      */
